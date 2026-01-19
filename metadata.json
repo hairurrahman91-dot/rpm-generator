@@ -1,0 +1,5 @@
+{
+  "name": "RPM Generator By Hairur Rahman",
+  "description": "Aplikasi Full Stack untuk membuat Rencana Pembelajaran Mendalam (RPM) otomatis menggunakan AI, dengan fitur ekspor PDF dan Word.",
+  "requestFramePermissions": []
+}
