@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { RPMFormData } from "../types";
+// Pastikan path types ini benar (biasanya ../types atau ../../types tergantung struktur folder Anda)
+import { RPMFormData } from "../types"; 
 
 const getAIClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -11,7 +12,7 @@ const getAIClient = () => {
 
 export const generateRPMContent = async (data: RPMFormData): Promise<string> => {
   const genAI = getAIClient();
-  // Menggunakan model gemini-1.5-flash yang stabil
+  // Menggunakan model stabil gemini-1.5-flash
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   const systemPrompt = `
