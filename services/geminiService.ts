@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RPMFormData } from "../types";
 
 const getAIClient = () => {
@@ -6,11 +6,13 @@ const getAIClient = () => {
   if (!apiKey) {
     throw new Error("API Key not found in environment variables");
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenerativeAI(apiKey);
 };
 
 export const generateRPMContent = async (data: RPMFormData): Promise<string> => {
-  const ai = getAIClient();
+  const genAI = getAIClient();
+  // Menggunakan model gemini-1.5-flash yang stabil
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   const systemPrompt = `
     Anda adalah pakar kurikulum dan instruktur pendidikan yang ahli dalam menyusun "Rencana Pembelajaran Mendalam (RPM)".
@@ -151,20 +153,22 @@ export const generateRPMContent = async (data: RPMFormData): Promise<string> => 
     (Jika relevan, buatkan tabel penilaian unjuk kerja/produk. Jika tidak, tulis "Tidak ada penilaian keterampilan khusus").
   `;
 
-  // PERUBAHAN PENTING DI SINI:
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash', 
-    contents: systemPrompt,
-  });
-
-  return response.text;
+  try {
+    const result = await model.generateContent(systemPrompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Error generating RPM:", error);
+    throw error;
+  }
 };
 
 export const generateToolboxContent = async (
   type: 'icebreaker' | 'quiz' | 'reflection',
   data: RPMFormData
 ): Promise<string> => {
-  const ai = getAIClient();
+  const genAI = getAIClient();
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   let prompt = "";
   if (type === 'icebreaker') {
@@ -175,11 +179,12 @@ export const generateToolboxContent = async (
     prompt = `Buatkan Lembar Refleksi Siswa yang menarik (menggunakan emoji jika perlu) untuk kelas ${data.phaseClass} setelah mempelajari TP: "${data.learningObjective}". Sertakan 5 pertanyaan reflektif sederhana.`;
   }
 
-  // PERUBAHAN PENTING DI SINI JUGA:
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash', 
-    contents: prompt,
-  });
-
-  return response.text;
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Error generating Toolbox:", error);
+    throw error;
+  }
 };
