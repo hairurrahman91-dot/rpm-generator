@@ -1,19 +1,16 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-// Pastikan path types ini benar (biasanya ../types atau ../../types tergantung struktur folder Anda)
-import { RPMFormData } from "../types"; 
+import { GoogleGenAI } from "@google/genai";
+import { RPMFormData } from "../types";
 
 const getAIClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("API Key not found in environment variables");
   }
-  return new GoogleGenerativeAI(apiKey);
+  return new GoogleGenAI({ apiKey });
 };
 
 export const generateRPMContent = async (data: RPMFormData): Promise<string> => {
-  const genAI = getAIClient();
-  // Menggunakan model stabil gemini-1.5-flash
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = getAIClient();
   
   const systemPrompt = `
     Anda adalah pakar kurikulum dan instruktur pendidikan yang ahli dalam menyusun "Rencana Pembelajaran Mendalam (RPM)".
@@ -34,12 +31,11 @@ export const generateRPMContent = async (data: RPMFormData): Promise<string> => 
 
     INSTRUKSI UTAMA:
     1. Gunakan format Markdown standar.
-    2. BERPIKIRLAH SECARA KRITIS: Sebelum menjawab, analisis karakteristik siswa dan mapel secara mendalam. Jangan memberikan jawaban umum/klise.
-    3. Pada "Kegiatan Inti", narasi harus **SANGAT TERPERINCI** dan langkah demi langkah.
-    4. **INTEGRASI MODEL PEMBELAJARAN**: Sintaks/langkah-langkah dari model pembelajaran **${data.learningModel}** harus diaplikasikan secara keseluruhan dan melebur ke dalam tahap **Memahami**, **Mengaplikasikan**, dan **Merefleksi**.
-    5. **PRINSIP**: AI harus memilih SATU prinsip yang paling relevan (Berkesadaran / Bermakna / Menggembirakan) untuk setiap tahap.
-    6. **DURASI WAKTU**: JANGAN tuliskan durasi waktu (misal: 10 menit, 15%) pada judul kegiatan Awal, Inti, maupun Penutup.
-    7. Pada bagian Lampiran LKPD, **WAJIB** buatkan LKPD yang berbeda untuk **SETIAP** pertemuan (Looping LKPD).
+    2. Pada "Kegiatan Inti", narasi harus **SANGAT TERPERINCI** dan langkah demi langkah.
+    3. **INTEGRASI MODEL PEMBELAJARAN**: Sintaks/langkah-langkah dari model pembelajaran **${data.learningModel}** harus diaplikasikan secara keseluruhan dan melebur ke dalam tahap **Memahami**, **Mengaplikasikan**, dan **Merefleksi**.
+    4. **PRINSIP**: AI harus memilih SATU prinsip yang paling relevan (Berkesadaran / Bermakna / Menggembirakan) untuk setiap tahap.
+    5. **DURASI WAKTU**: JANGAN tuliskan durasi waktu (misal: 10 menit, 15%) pada judul kegiatan Awal, Inti, maupun Penutup.
+    6. Pada bagian Lampiran LKPD, **WAJIB** buatkan LKPD yang berbeda untuk **SETIAP** pertemuan (Looping LKPD).
 
     --- FORMAT OUTPUT MARKDOWN ---
 
@@ -154,22 +150,19 @@ export const generateRPMContent = async (data: RPMFormData): Promise<string> => 
     (Jika relevan, buatkan tabel penilaian unjuk kerja/produk. Jika tidak, tulis "Tidak ada penilaian keterampilan khusus").
   `;
 
-  try {
-    const result = await model.generateContent(systemPrompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error("Error generating RPM:", error);
-    throw error;
-  }
+  const response = await ai.models.generateContent({
+    model: 'gemini-flash-latest',
+    contents: systemPrompt,
+  });
+
+  return response.text;
 };
 
 export const generateToolboxContent = async (
   type: 'icebreaker' | 'quiz' | 'reflection',
   data: RPMFormData
 ): Promise<string> => {
-  const genAI = getAIClient();
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = getAIClient();
   
   let prompt = "";
   if (type === 'icebreaker') {
@@ -180,12 +173,10 @@ export const generateToolboxContent = async (
     prompt = `Buatkan Lembar Refleksi Siswa yang menarik (menggunakan emoji jika perlu) untuk kelas ${data.phaseClass} setelah mempelajari TP: "${data.learningObjective}". Sertakan 5 pertanyaan reflektif sederhana.`;
   }
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error("Error generating Toolbox:", error);
-    throw error;
-  }
+  const response = await ai.models.generateContent({
+    model: 'gemini-flash-latest',
+    contents: prompt,
+  });
+
+  return response.text;
 };
