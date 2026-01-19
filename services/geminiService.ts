@@ -151,8 +151,9 @@ export const generateRPMContent = async (data: RPMFormData): Promise<string> => 
     (Jika relevan, buatkan tabel penilaian unjuk kerja/produk. Jika tidak, tulis "Tidak ada penilaian keterampilan khusus").
   `;
 
+  // PERUBAHAN PENTING DI SINI:
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
+    model: 'gemini-1.5-flash', 
     contents: systemPrompt,
   });
 
@@ -174,8 +175,9 @@ export const generateToolboxContent = async (
     prompt = `Buatkan Lembar Refleksi Siswa yang menarik (menggunakan emoji jika perlu) untuk kelas ${data.phaseClass} setelah mempelajari TP: "${data.learningObjective}". Sertakan 5 pertanyaan reflektif sederhana.`;
   }
 
+  // PERUBAHAN PENTING DI SINI JUGA:
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
+    model: 'gemini-1.5-flash', 
     contents: prompt,
   });
 
